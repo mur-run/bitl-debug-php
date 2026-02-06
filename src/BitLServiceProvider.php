@@ -48,6 +48,8 @@ class BitLServiceProvider extends ServiceProvider
         // Register error handler if enabled
         if (config('bitl.capture_errors', true)) {
             $this->registerExceptionReporting();
+            // Also register PHP error handler for warnings/notices
+            $this->registerErrorHandler();
         }
 
         // Listen for database queries
@@ -83,6 +85,42 @@ class BitLServiceProvider extends ServiceProvider
             // Fallback: register native PHP error handler
             BitL::register();
         }
+    }
+
+    /**
+     * Register PHP error handler for warnings/notices.
+     */
+    protected function registerErrorHandler(): void
+    {
+        $previousHandler = set_error_handler(function (
+            int $errno,
+            string $errstr,
+            string $errfile = '',
+            int $errline = 0
+        ) use (&$previousHandler) {
+            // Don't report suppressed errors
+            if (! (error_reporting() & $errno)) {
+                return false;
+            }
+
+            $level = match ($errno) {
+                E_WARNING, E_USER_WARNING => 'Warning',
+                E_NOTICE, E_USER_NOTICE => 'Notice',
+                E_DEPRECATED, E_USER_DEPRECATED => 'Deprecated',
+                E_STRICT => 'Strict',
+                default => 'Error',
+            };
+
+            // Send to BitL
+            BitL::warning("[{$level}] {$errstr}", $errfile, $errline);
+
+            // Call previous handler if exists
+            if ($previousHandler !== null) {
+                return $previousHandler($errno, $errstr, $errfile, $errline);
+            }
+
+            return false; // Let PHP handle it normally
+        });
     }
 
     /**
