@@ -66,12 +66,10 @@ class BitLServiceProvider extends ServiceProvider
      */
     protected function registerExceptionReporting(): void
     {
-        // Laravel 11+ uses bootstrap/app.php for exception handling
-        // For earlier versions, we hook into the exception handler
         try {
             $handler = $this->app->make(\Illuminate\Contracts\Debug\ExceptionHandler::class);
             
-            // Laravel 8+ has reportable() on the handler
+            // Laravel 8-10: Use reportable() on the handler directly
             if (method_exists($handler, 'reportable')) {
                 $handler->reportable(function (\Throwable $e) {
                     BitL::error($e);
@@ -82,7 +80,7 @@ class BitLServiceProvider extends ServiceProvider
                 BitL::register();
             }
         } catch (\Throwable) {
-            // If we can't get the handler, use native PHP error handler
+            // Fallback: register native PHP error handler
             BitL::register();
         }
     }

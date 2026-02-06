@@ -69,9 +69,37 @@ BitL::mail(
 
 The package auto-discovers in Laravel and automatically:
 
-- Captures PHP errors and exceptions
 - Logs all database queries
 - Captures outgoing mail
+
+### Exception Capturing (Laravel 11+)
+
+For Laravel 11+, add exception reporting in `bootstrap/app.php`:
+
+```php
+->withExceptions(function (Exceptions $exceptions) {
+    $exceptions->reportable(function (\Throwable $e) {
+        if (class_exists(\BitL\Debug\BitL::class)) {
+            \BitL\Debug\BitL::error($e);
+        }
+        return false;
+    });
+})
+```
+
+### Exception Capturing (Laravel 8-10)
+
+For Laravel 8-10, add to `app/Exceptions/Handler.php`:
+
+```php
+public function register(): void
+{
+    $this->reportable(function (\Throwable $e) {
+        \BitL\Debug\BitL::error($e);
+        return false;
+    });
+}
+```
 
 ### Configuration
 
