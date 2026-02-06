@@ -12,8 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update Packagist
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
         run: |
+          echo "Username length: ${#PACKAGIST_USERNAME}"
+          echo "Token length: ${#PACKAGIST_TOKEN}"
           curl -XPOST \
             -H "Content-Type: application/json" \
-            "https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_TOKEN }}" \
+            "https://packagist.org/api/update-package?username=${PACKAGIST_USERNAME}&apiToken=${PACKAGIST_TOKEN}" \
             -d '{"repository":{"url":"https://github.com/mur-run/bitl-debug-php"}}'
