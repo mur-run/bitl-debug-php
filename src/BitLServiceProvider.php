@@ -47,7 +47,7 @@ class BitLServiceProvider extends ServiceProvider
 
         // Register error handler if enabled
         if (config('bitl.capture_errors', true)) {
-            BitL::register();
+            $this->registerExceptionReporting();
         }
 
         // Listen for database queries
@@ -58,6 +58,32 @@ class BitLServiceProvider extends ServiceProvider
         // Listen for mail
         if (config('bitl.capture_mail', true)) {
             $this->listenForMail();
+        }
+    }
+
+    /**
+     * Register exception reporting with Laravel's exception handler.
+     */
+    protected function registerExceptionReporting(): void
+    {
+        // Laravel 11+ uses bootstrap/app.php for exception handling
+        // For earlier versions, we hook into the exception handler
+        try {
+            $handler = $this->app->make(\Illuminate\Contracts\Debug\ExceptionHandler::class);
+            
+            // Laravel 8+ has reportable() on the handler
+            if (method_exists($handler, 'reportable')) {
+                $handler->reportable(function (\Throwable $e) {
+                    BitL::error($e);
+                    return false; // Don't stop other reporters
+                });
+            } else {
+                // Fallback: register native PHP error handler
+                BitL::register();
+            }
+        } catch (\Throwable) {
+            // If we can't get the handler, use native PHP error handler
+            BitL::register();
         }
     }
 
