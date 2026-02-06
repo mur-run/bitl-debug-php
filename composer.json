@@ -1,0 +1,44 @@
+{
+    "name": "bitl/debug",
+    "description": "BitL Debug Integration - Send errors, dumps, and queries to BitL's debug bar",
+    "keywords": ["bitl", "debug", "laravel", "dump", "error-handling"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "BitL Team",
+            "email": "hello@bitl.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "orchestra/testbench": "^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BitL\\Debug\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BitL\\Debug\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BitL\\Debug\\BitLServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
